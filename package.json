@@ -3,16 +3,32 @@
   "version": "1.0.0",
   "description": "shared dev dependencies",
   "scripts": {
-    "start": "docker-compose up"
+    "start": "docker-compose up",
+    "test": "jest --no-cache ./code-chat",
+    "watch": "jest --no-cache --watch ./code-chat"
+  },
+  "jest": {
+    "modulePathIgnorePatterns": [
+      "package.json"
+    ]
   },
   "author": "easygo",
   "license": "UNLICENSED",
   "devDependencies": {
-    "eslint": "^6.0.1",
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.8.7",
+    "@babel/plugin-syntax-bigint": "^7.8.3",
+    "@babel/preset-env": "^7.8.7",
+    "@types/jest": "^25.1.4",
+    "@types/node": "^13.9.1",
+    "babel-eslint": "^10.1.0",
+    "babel-jest": "^25.1.0",
     "eslint-config-airbnb-base": "^13.0.0",
     "eslint-config-prettier": "^6.0.0",
-    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-prettier": "^3.0.0",
+    "eslint": "^6.8.0",
+    "jest": "^25.1.0",
     "prettier": "^1.15.3"
   }
 }
