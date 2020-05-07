@@ -5,7 +5,7 @@
   "scripts": {
     "start": "docker-compose up",
     "test": "jest --no-cache ./code-chat",
-    "watch": "jest --no-cache --watch ./code-chat"
+    "watch": "jest --noStackTrace --no-cache --watch ./code-chat"
   },
   "jest": {
     "modulePathIgnorePatterns": [
