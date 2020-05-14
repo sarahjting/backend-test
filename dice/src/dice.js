@@ -23,31 +23,24 @@ exports.rollDice = ({ user, amount, target }) =>
     assert(target < 99);
     assert(amount >= 0);
 
-    let seed = null;
-    let nonce = 0;
-
-    while (!seed) {
-      [seed] = await trx('seed').where('user', user);
-      if (!seed) {
-        const secret = crypto.randomBytes(32).toString('hex');
-        const hash = crypto
-          .createHash('sha256')
-          .update(secret)
-          .digest('hex');
-
-        [seed] = await trx('seed')
-          .insert({ id: uuid(), user, secret, hash, nonce: 0, active: true })
-          .returning('*');
-      }
-
-      nonce = String(seed.nonce + 1);
+    let [seed] = await trx('seed').where('user', user);
+    if (!seed) {
+      const secret = crypto.randomBytes(32).toString('hex');
+      const hash = crypto
+        .createHash('sha256')
+        .update(secret)
+        .digest('hex');
 
       [seed] = await trx('seed')
-        .where('user', user)
-        .where('nonce', seed.nonce)
-        .update({ nonce })
+        .insert({ id: uuid(), user, secret, hash, nonce: 0, active: true })
         .returning('*');
     }
+
+    [seed] = await trx('seed')
+      .where('user', user)
+      .update({ nonce: knex.raw('nonce + 1') })
+      .returning('*');
+    const nonce = String(seed.nonce);
 
     const hmac = crypto
       .createHmac('sha256', seed.secret)
