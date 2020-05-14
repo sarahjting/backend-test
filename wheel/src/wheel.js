@@ -74,7 +74,7 @@ exports.spinWheel = ({ user, amount }) =>
       })
       .returning('*');
 
-    await redis.publish('wheel', JSON.stringify(bet));
+    await redis.publish('wheel', JSON.stringify({ ...bet, game: 'wheel' }));
 
     return bet;
   });

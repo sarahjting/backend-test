@@ -4,7 +4,7 @@ const { knex } = require('./knex');
 const { redis } = require('./redis');
 const { updateStatistic, getStatistic } = require('./statistic');
 
-const response = handler => async (req, res) => {
+const response = (handler) => async (req, res) => {
   try {
     res.send(await handler(req.body));
   } catch (e) {
@@ -16,10 +16,12 @@ async function start() {
   await knex.migrate.latest();
 
   redis.subscribe('dice');
+  redis.subscribe('wheel');
+
   redis.on('message', async (channel, json) => {
     try {
       const data = JSON.parse(json);
-      if (channel === 'dice') {
+      if (['dice', 'wheel'].includes(channel)) {
         await updateStatistic(data);
       }
     } catch (e) {
@@ -33,7 +35,7 @@ async function start() {
 
   app.post(
     '/get-statistic',
-    response(async ({ user }) => getStatistic({ user }))
+    response(async ({ user, game }) => getStatistic({ user, game }))
   );
 
   app.listen(80);

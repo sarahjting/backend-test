@@ -77,7 +77,7 @@ exports.rollDice = ({ user, amount, target }) =>
       })
       .returning('*');
 
-    await redis.publish('dice', JSON.stringify(bet));
+    await redis.publish('dice', JSON.stringify({ ...bet, game: 'dice' }));
 
     return bet;
   });
