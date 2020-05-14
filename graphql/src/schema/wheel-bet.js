@@ -2,9 +2,8 @@ const {
   GraphQLObjectType,
   GraphQLInt,
   GraphQLFloat,
-  GraphQLString,
+  GraphQLString
 } = require('graphql');
-const axios = require('axios');
 const User = require('./user');
 const Seed = require('./seed');
 
@@ -18,14 +17,12 @@ exports.Type = new GraphQLObjectType({
     nonce: { type: GraphQLInt },
     user: {
       type: User.Type,
-      resolve: ({ user }) => ({ name: user }),
+      resolve: ({ user }) => ({ name: user })
     },
     seed: {
       type: Seed.Type,
-      resolve: async ({ seed_id: seedId }) => {
-        const { data } = await axios.post(`http://wheel/get-seed`, { seedId });
-        return data;
-      },
-    },
-  }),
+      resolve: ({ seed_id: seedId }, _, { loaders }) =>
+        loaders.wheelSeedLoader.load(seedId)
+    }
+  })
 });

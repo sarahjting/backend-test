@@ -4,7 +4,6 @@ const {
   GraphQLFloat,
   GraphQLString
 } = require('graphql');
-const axios = require('axios');
 const User = require('./user');
 const Seed = require('./seed');
 
@@ -23,10 +22,8 @@ exports.Type = new GraphQLObjectType({
     },
     seed: {
       type: Seed.Type,
-      resolve: async ({ seed_id: seedId }) => {
-        const { data } = await axios.post(`http://dice/get-seed`, { seedId });
-        return data;
-      }
+      resolve: ({ seed_id: seedId }, _, { loaders }) =>
+        loaders.diceSeedLoader.load(seedId)
     }
   })
 });

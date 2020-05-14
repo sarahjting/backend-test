@@ -2,6 +2,7 @@ const _ = require('lodash');
 const express = require('express');
 const { ApolloServer } = require('apollo-server-express');
 const schema = require('./schema');
+const { loaders } = require('./dataloader');
 
 async function start() {
   const app = express();
@@ -15,7 +16,7 @@ async function start() {
       that as an identifier withhin this project.
     */
       const user = _.get(req, 'headers.x-user', 'easygo');
-      return { user };
+      return { user, loaders: loaders() };
     },
     introspection: true,
     playground: { endpoint: 'http://localhost/graphql' }
