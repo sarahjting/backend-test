@@ -53,7 +53,6 @@ exports.spinWheel = ({ user, amount }) =>
 
     const result = Math.floor(float * segments.length);
 
-    // 0.99 applies our house edge of 1%
     const payout = amount * segments[result];
     const [bet] = await trx('bet')
       .insert({
