@@ -5,7 +5,7 @@ const assert = require('assert');
 const { knex } = require('./knex');
 const { redis } = require('./redis');
 
-const parseSeed = seed => {
+const parseSeed = (seed) => {
   if (!seed) {
     return null;
   }
@@ -18,26 +18,36 @@ const parseSeed = seed => {
 };
 
 exports.rollDice = ({ user, amount, target }) =>
-  knex.transaction(async trx => {
+  knex.transaction(async (trx) => {
     assert(target >= 0);
     assert(target < 99);
     assert(amount >= 0);
 
-    let [seed] = await trx('seed').where('user', user);
+    let seed = null;
+    let nonce = 0;
 
-    if (!seed) {
-      const secret = crypto.randomBytes(32).toString('hex');
-      const hash = crypto
-        .createHash('sha256')
-        .update(secret)
-        .digest('hex');
+    while (!seed) {
+      [seed] = await trx('seed').where('user', user);
+      if (!seed) {
+        const secret = crypto.randomBytes(32).toString('hex');
+        const hash = crypto
+          .createHash('sha256')
+          .update(secret)
+          .digest('hex');
+
+        [seed] = await trx('seed')
+          .insert({ id: uuid(), user, secret, hash, nonce: 0, active: true })
+          .returning('*');
+      }
+
+      nonce = String(seed.nonce + 1);
 
       [seed] = await trx('seed')
-        .insert({ id: uuid(), user, secret, hash, nonce: 0, active: true })
+        .where('user', user)
+        .where('nonce', seed.nonce)
+        .update({ nonce })
         .returning('*');
     }
-
-    const nonce = String(seed.nonce + 1);
 
     const hmac = crypto
       .createHmac('sha256', seed.secret)
@@ -63,13 +73,9 @@ exports.rollDice = ({ user, amount, target }) =>
         payout,
         result,
         target,
-        nonce
+        nonce,
       })
       .returning('*');
-
-    await trx('seed')
-      .update('nonce', trx.raw('nonce + 1'))
-      .where('id', seed.id);
 
     await redis.publish('dice', JSON.stringify(bet));
 
